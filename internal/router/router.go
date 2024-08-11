@@ -8,7 +8,14 @@ import (
 func SetupRouter() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /api/todos/", handlers.GetAllTodos)
+	mux.HandleFunc("/api/todos", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			handlers.GetAllTodosHandler(w, r)
+		case http.MethodPost:
+			handlers.CreateTodoHandler(w, r)
+		}
+	})
 
 	return mux
 }
