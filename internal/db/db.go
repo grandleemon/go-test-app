@@ -57,26 +57,57 @@ func GetAllTodos() ([]models.Todo, error) {
 		var todo models.Todo
 
 		if err := rows.Scan(&todo.ID, &todo.Title, &todo.Description, &todo.IsCompleted); err != nil {
-			log.Println("ERROR", err)
 			return todos, fmt.Errorf("failed to scan todo: %w", err)
 		}
 
 		todos = append(todos, todo)
 	}
 
-	log.Println("HERE", todos)
-
 	return todos, nil
+}
+
+func GetTodoByID(id int) (models.Todo, error) {
+	var todo models.Todo
+
+	query := `SELECT id, title, description, is_completed FROM todos WHERE id = $1`
+
+	row := dbConn.QueryRow(context.Background(), query, id)
+
+	err := row.Scan(&todo.ID, &todo.Title, &todo.Description, &todo.IsCompleted)
+
+	if err != nil {
+		return todo, err
+	}
+
+	return todo, nil
 }
 
 func CreateTodo(todo models.Todo) (int, error) {
 	var id int
+
 	query := "INSERT INTO todos (title, description) VALUES ($1, $2) RETURNING id"
 
 	err := dbConn.QueryRow(context.Background(), query, todo.Title, todo.Description).Scan(&id)
+
 	if err != nil {
 		return 0, fmt.Errorf("error inserting todo: %w", err)
 	}
 
 	return id, nil
+}
+
+func UpdateTodo(id int, todo models.Todo) error {
+	query := "UPDATE todos SET title=$1, description=$2, is_completed=$3 WHERE id=$4"
+
+	_, err := dbConn.Exec(context.Background(), query, todo.Title, todo.Description, todo.IsCompleted, id)
+
+	return err
+}
+
+func DeleteTodoById(id int) error {
+	query := "DELETE FROM todos WHERE id = $1"
+
+	_, err := dbConn.Exec(context.Background(), query, id)
+
+	return err
 }

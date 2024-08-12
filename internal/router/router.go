@@ -17,5 +17,14 @@ func SetupRouter() *http.ServeMux {
 		}
 	})
 
+	mux.HandleFunc("/api/todos/{id}", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPut:
+			handlers.UpdateTodoHandler(w, r)
+		case http.MethodDelete:
+			handlers.DeleteTodoHandler(w, r)
+		}
+	})
+
 	return mux
 }
