@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/grandleemon/go-test-app.git/internal/db"
+	"github.com/grandleemon/go-test-app.git/internal/db/todos"
 	"github.com/grandleemon/go-test-app.git/internal/models"
 	"net/http"
 	"strconv"
@@ -10,7 +10,7 @@ import (
 )
 
 func GetAllTodosHandler(w http.ResponseWriter, r *http.Request) {
-	todos, err := db.GetAllTodos()
+	_todos, err := todos.GetAll()
 
 	if err != nil {
 		http.Error(w, "Failed to fetch todos", http.StatusInternalServerError)
@@ -18,7 +18,7 @@ func GetAllTodosHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(todos)
+	json.NewEncoder(w).Encode(_todos)
 }
 
 func CreateTodoHandler(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +31,7 @@ func CreateTodoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := db.CreateTodo(todo)
+	id, err := todos.Create(todo)
 
 	if err != nil {
 		http.Error(w, "Failed to create todo", http.StatusInternalServerError)
@@ -54,7 +54,7 @@ func UpdateTodoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	existingTodo, existingTodoErr := db.GetTodoByID(id)
+	existingTodo, existingTodoErr := todos.GetByID(id)
 	if existingTodoErr != nil {
 		http.Error(w, "Todo not found", http.StatusNotFound)
 		return
@@ -74,12 +74,12 @@ func UpdateTodoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	existingTodo.IsCompleted = updates.IsCompleted
 
-	if err := db.UpdateTodo(id, existingTodo); err != nil {
+	if err := todos.Update(id, existingTodo); err != nil {
 		http.Error(w, "Failed to update todo", http.StatusInternalServerError)
 		return
 	}
 
-	updatedTodo, updatedTodoErr := db.GetTodoByID(id)
+	updatedTodo, updatedTodoErr := todos.GetByID(id)
 	if updatedTodoErr != nil {
 		http.Error(w, "Failed to retrieve updated todo", http.StatusInternalServerError)
 		return
@@ -99,14 +99,14 @@ func DeleteTodoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, existingTodoErr := db.GetTodoByID(id)
+	_, existingTodoErr := todos.GetByID(id)
 
 	if existingTodoErr != nil {
 		http.Error(w, "Todo not found", http.StatusNotFound)
 		return
 	}
 
-	deleteTodoErr := db.DeleteTodoById(id)
+	deleteTodoErr := todos.DeleteById(id)
 
 	if deleteTodoErr != nil {
 		http.Error(w, "Failed to delete todo:"+deleteTodoErr.Error(), http.StatusInternalServerError)
