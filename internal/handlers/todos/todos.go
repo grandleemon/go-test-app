@@ -1,4 +1,4 @@
-package handlers
+package todoshandlers
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func GetAllTodosHandler(w http.ResponseWriter, r *http.Request) {
+func GetAll(w http.ResponseWriter, r *http.Request) {
 	_todos, err := todos.GetAll()
 
 	if err != nil {
@@ -21,7 +21,7 @@ func GetAllTodosHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(_todos)
 }
 
-func CreateTodoHandler(w http.ResponseWriter, r *http.Request) {
+func Create(w http.ResponseWriter, r *http.Request) {
 	var todo models.Todo
 
 	err := json.NewDecoder(r.Body).Decode(&todo)
@@ -43,7 +43,7 @@ func CreateTodoHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(todo)
 }
 
-func UpdateTodoHandler(w http.ResponseWriter, r *http.Request) {
+func Update(w http.ResponseWriter, r *http.Request) {
 	pathSegments := strings.Split(r.URL.Path, "/")
 
 	idStr := pathSegments[len(pathSegments)-1]
@@ -88,7 +88,7 @@ func UpdateTodoHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(updatedTodo)
 }
 
-func DeleteTodoHandler(w http.ResponseWriter, r *http.Request) {
+func Delete(w http.ResponseWriter, r *http.Request) {
 	pathSegments := strings.Split(r.URL.Path, "/")
 
 	idStr := pathSegments[len(pathSegments)-1]
