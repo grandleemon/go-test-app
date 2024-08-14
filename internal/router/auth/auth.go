@@ -6,14 +6,14 @@ import (
 )
 
 func Register(mux *http.ServeMux) {
-	mux.HandleFunc("/api/users/register", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/auth/register", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
 			authhandlers.Register(w, r)
 		}
 	})
 
-	mux.HandleFunc("/api/users/login", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/auth/login", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
 			authhandlers.Login(w, r)

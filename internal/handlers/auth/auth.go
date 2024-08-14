@@ -22,12 +22,26 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = auth.Register(user.Email, user.Password)
+	userId, registerErr := auth.Register(user.Email, user.Password)
 
-	if err != nil {
+	if registerErr != nil {
 		http.Error(w, "Failed to register user", http.StatusInternalServerError)
 		return
 	}
+
+	session, sessionErr := auth.CreateSession(userId)
+
+	if sessionErr != nil {
+		http.Error(w, "Failed to create session", http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_token",
+		Value:    session.SessionToken,
+		Expires:  session.ExpiresAt,
+		HttpOnly: true,
+	})
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("User registered successfully"))

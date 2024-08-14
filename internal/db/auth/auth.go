@@ -7,24 +7,26 @@ import (
 	"github.com/grandleemon/go-test-app.git/pkg/security"
 )
 
-func Register(email, password string) error {
+func Register(email, password string) (int, error) {
 	salt, err := security.GenerateSalt(16)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	hashedPassword := security.HashPassword(password, salt)
 
-	query := "INSERT INTO users (email, password, salt) VALUES ($1, $2, $3)"
+	query := "INSERT INTO users (email, password, salt) VALUES ($1, $2, $3) RETURNING id"
 
-	_, insertErr := db.DbConn.Exec(context.Background(), query, email, hashedPassword, salt)
+	var id int
+
+	insertErr := db.DbConn.QueryRow(context.Background(), query, email, hashedPassword, salt).Scan(&id)
 
 	if insertErr != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return id, nil
 }
 
 func Login(email, password string) (bool, error) {
